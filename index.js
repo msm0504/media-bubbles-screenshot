@@ -32,13 +32,7 @@ async function getImageBufferFromPage(page, pageToCapture) {
 async function sendImagetoAws(imageKey, imageBuffer) {
 	if (!imageKey || !imageBuffer) return;
 
-	const client = new S3Client({
-		credentials: {
-			accessKeyId: process.env.AWS_S3_KEY || '',
-			secretAccessKey: process.env.AWS_S3_SECRET || ''
-		},
-		region: process.env.AWS_S3_REGION
-	});
+	const client = new S3Client();
 	const params = {
 		Body: imageBuffer,
 		Key: imageKey,

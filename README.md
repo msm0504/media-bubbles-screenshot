@@ -15,9 +15,6 @@ This Lambda function will take a screenshot of a given webpage and save the imag
 
 | Name          |
 | ------------- |
-| AWS_S3_KEY    |
-| AWS_S3_SECRET |
-| AWS_S3_REGION |
 | AWS_S3_BUCKET |
 
 ## Function Definition
