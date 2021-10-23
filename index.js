@@ -72,8 +72,8 @@ exports.handler = async function (event) {
 	};
 
 	switch (event.routeKey) {
-		case 'PUT /takeScreenshot': {
-			const { pageToCapture, imageKey } = event.body;
+		case 'PUT /take-screenshot': {
+			const { pageToCapture, imageKey } = JSON.parse(event.body);
 			if (!pageToCapture || !imageKey) {
 				statusCode = 400;
 				body = 'Request Body must contain pageToCapture and imageKey properties';
