@@ -45,8 +45,8 @@ async function sendImagetoAws(imageKey, imageBuffer) {
 	return;
 }
 
-exports.handler = async function takeResultScreenshot(pageToCapture, imageKey) {
-	let imageUrl = '';
+async function takeScreenshot(pageToCapture, imageKey) {
+	const result = { imageUrl: '' };
 	let browser = null;
 	let page = null;
 	try {
@@ -54,12 +54,48 @@ exports.handler = async function takeResultScreenshot(pageToCapture, imageKey) {
 		page = await browser.newPage();
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
 		await sendImagetoAws(imageKey, imageBuffer);
-		imageUrl = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
+		result.imageUrl = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
 	} catch (error) {
-		console.log(error);
+		result.error = error;
 	} finally {
 		if (page !== null) await page.close();
 		if (browser !== null) await browser.close();
 	}
-	return imageUrl;
+	return result;
+}
+
+exports.handler = async function (event) {
+	let body;
+	let statusCode = 200;
+	const headers = {
+		'Content-Type': 'application/json'
+	};
+
+	switch (event.routeKey) {
+		case 'PUT /takeScreenshot': {
+			const { pageToCapture, imageKey } = event.body;
+			if (!pageToCapture || !imageKey) {
+				statusCode = 400;
+				body = 'Request Body must contain pageToCapture and imageKey properties';
+				break;
+			}
+			const output = await takeScreenshot(pageToCapture, imageKey);
+			if (output.error) {
+				statusCode = 500;
+				body = output.error;
+			} else {
+				body = output;
+			}
+			break;
+		}
+		default:
+			statusCode = 405;
+			body = `Method ${event.routeKey} is not supported`;
+	}
+
+	return {
+		statusCode,
+		body,
+		headers
+	};
 };
