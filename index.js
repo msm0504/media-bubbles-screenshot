@@ -19,14 +19,16 @@ async function getImageBufferFromPage(page, pageToCapture) {
 	await page.waitForSelector(process.env.SELECTOR);
 	const results = await page.$(process.env.SELECTOR);
 	const boundingBox = await results?.boundingBox();
-	return (results || page).screenshot({
+	const params = {
 		clip: {
 			x: boundingBox?.x ?? 0,
 			y: boundingBox?.y ?? 0,
 			width: boundingBox?.width || process.env.VIEWPORT_WIDTH,
 			height: process.env.SCREENSHOT_HEIGHT || process.env.VIEWPORT_HEIGHT
 		}
-	});
+	};
+	console.log(`Screenshot params: ${JSON.stringify(params)}`);
+	return (results || page).screenshot(params);
 }
 
 async function sendImagetoAws(imageKey, imageBuffer) {
@@ -39,6 +41,7 @@ async function sendImagetoAws(imageKey, imageBuffer) {
 		Bucket: process.env.AWS_S3_BUCKET,
 		ACL: 'public-read'
 	};
+	console.log(`AWS command params: ${JSON.stringify(params)}`);
 	const commmand = new PutObjectCommand(params);
 	await client.send(commmand);
 
@@ -50,9 +53,12 @@ async function takeScreenshot(pageToCapture, imageKey) {
 	let browser = null;
 	let page = null;
 	try {
+		console.log('Getting browser instance...');
 		browser = await getBrowserInstance();
 		page = await browser.newPage();
+		console.log('Taking screenshot...');
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
+		console.log('Putting screenshot in S3...');
 		await sendImagetoAws(imageKey, imageBuffer);
 		result.imageUrl = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
 	} catch (error) {
