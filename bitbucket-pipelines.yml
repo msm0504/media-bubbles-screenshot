@@ -7,12 +7,9 @@ image: atlassian/default-image:2
 pipelines:
   default:
     - step:
-        name: 'Install Dependencies'
+        name: 'Build and Package Code'
         script:
           - npm install
-    - step:
-        name: 'Package Code'
-        script:
           - apt-get update && apt-get install -y zip
           - zip -r code.zip ./
         artifacts:
