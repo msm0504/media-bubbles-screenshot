@@ -9,7 +9,7 @@ pipelines:
     - step:
         name: 'Build and Package Code'
         script:
-          - npm install
+          - npm install --production
           - apt-get update && apt-get install -y zip
           - zip -r code.zip ./
         artifacts:
@@ -20,7 +20,7 @@ pipelines:
           - pipe: atlassian/aws-lambda-deploy:1.2.0
             variables:
               AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} 
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
               AWS_DEFAULT_REGION: 'us-east-2'
               FUNCTION_NAME: 'takeScreenshot'
               COMMAND: 'update'
