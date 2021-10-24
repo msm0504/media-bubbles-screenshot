@@ -58,6 +58,7 @@ async function takeScreenshot(pageToCapture, imageKey) {
 		console.log(
 			`Browser has newPage function: ${Object.prototype.hasOwnProperty.call(browser, 'newPage')}`
 		);
+		console.log(`Type of browser: ${typeof browser}`);
 		console.log('Opening browser page...');
 		page = await browser.newPage();
 		console.log('Taking screenshot...');
