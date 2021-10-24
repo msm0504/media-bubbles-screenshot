@@ -1,8 +1,9 @@
 const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 const { S3Client, PutObjectCommand } = require('aws-sdk');
 
 async function getBrowserInstance() {
-	return chromium.puppeteer.launch({
+	return puppeteer.launch({
 		args: chromium.args,
 		executablePath: await chromium.executablePath,
 		headless: chromium.headless,
