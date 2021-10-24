@@ -9,7 +9,6 @@ pipelines:
     - step:
         name: 'Build and Package Code'
         script:
-          - npm install --production
           - apt-get update && apt-get install -y zip
           - zip -r code.zip ./
         artifacts:
