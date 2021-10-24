@@ -1,4 +1,5 @@
 const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 const { S3Client, PutObjectCommand } = require('aws-sdk');
 
 async function getBrowserInstance() {
@@ -14,7 +15,7 @@ async function getBrowserInstance() {
 		ignoreHTTPSErrors: true
 	};
 	console.log(`Browser params: ${JSON.stringify(params)}`);
-	return chromium.puppeteer.launch(params);
+	return puppeteer.launch(params);
 }
 
 async function getImageBufferFromPage(page, pageToCapture) {
