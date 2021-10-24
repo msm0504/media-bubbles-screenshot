@@ -6,7 +6,7 @@ async function getBrowserInstance() {
 	const params = {
 		args: chromium.args,
 		executablePath: executablePath,
-		headless: true,
+		headless: chromium.headless,
 		defaultViewport: {
 			width: process.env.VIEWPORT_WIDTH,
 			height: process.env.VIEWPORT_HEIGHT
