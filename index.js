@@ -1,9 +1,8 @@
 const chromium = require('chrome-aws-lambda');
-const puppeteer = require('puppeteer-core');
 const { S3Client, PutObjectCommand } = require('aws-sdk');
 
 async function getBrowserInstance() {
-	return puppeteer.launch({
+	return chromium.puppeteer.launch({
 		args: chromium.args,
 		executablePath: await chromium.executablePath,
 		headless: chromium.headless,
@@ -56,13 +55,11 @@ async function takeScreenshot(pageToCapture, imageKey) {
 	try {
 		console.log('Getting browser instance...');
 		browser = await getBrowserInstance();
+		console.log(
+			`Browser has newPage function: ${Object.prototype.hasOwnProperty.call(browser, 'newPage')}`
+		);
 		console.log('Opening browser page...');
 		page = await browser.newPage();
-
-		page.on('error', error => {
-			console.log(`PAGE ERROR: ${error}`);
-		});
-
 		console.log('Taking screenshot...');
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
 		console.log('Putting screenshot in S3...');
