@@ -58,6 +58,11 @@ async function takeScreenshot(pageToCapture, imageKey) {
 		browser = await getBrowserInstance();
 		console.log('Opening browser page...');
 		page = await browser.newPage();
+
+		page.on('error', error => {
+			console.log(`PAGE ERROR: ${error}`);
+		});
+
 		console.log('Taking screenshot...');
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
 		console.log('Putting screenshot in S3...');
