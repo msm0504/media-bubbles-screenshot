@@ -2,19 +2,16 @@ const chromium = require('chrome-aws-lambda');
 const { S3Client, PutObjectCommand } = require('aws-sdk');
 
 async function getBrowserInstance() {
-	const executablePath = await chromium.executablePath;
-	const params = {
+	return chromium.puppeteer.launch({
 		args: chromium.args,
-		executablePath: executablePath,
+		executablePath: await chromium.executablePath,
 		headless: chromium.headless,
 		defaultViewport: {
 			width: process.env.VIEWPORT_WIDTH,
 			height: process.env.VIEWPORT_HEIGHT
 		},
 		ignoreHTTPSErrors: true
-	};
-	console.log(`Browser params: ${JSON.stringify(params)}`);
-	return chromium.puppeteer.launch(params);
+	});
 }
 
 async function getImageBufferFromPage(page, pageToCapture) {
