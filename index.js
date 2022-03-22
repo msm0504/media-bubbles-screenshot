@@ -82,26 +82,18 @@ exports.handler = async function (event) {
 		'Content-Type': 'application/json'
 	};
 
-	switch (event.routeKey) {
-		case 'PUT /take-screenshot': {
-			const { pageToCapture, imageKey } = JSON.parse(event.body);
-			if (!pageToCapture || !imageKey) {
-				statusCode = 400;
-				body = 'Request Body must contain pageToCapture and imageKey properties';
-				break;
-			}
-			const output = await takeScreenshot(pageToCapture, imageKey);
-			if (output.error) {
-				statusCode = 500;
-				body = output.error;
-			} else {
-				body = output;
-			}
-			break;
+	const { pageToCapture, imageKey } = JSON.parse(event.body);
+	if (!pageToCapture || !imageKey) {
+		statusCode = 400;
+		body = 'Request Body must contain pageToCapture and imageKey properties';
+	} else {
+		const output = await takeScreenshot(pageToCapture, imageKey);
+		if (output.error) {
+			statusCode = 500;
+			body = output.error;
+		} else {
+			body = output;
 		}
-		default:
-			statusCode = 405;
-			body = `Method ${event.routeKey} is not supported`;
 	}
 
 	return {
