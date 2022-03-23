@@ -53,7 +53,7 @@ async function takeScreenshot(pageToCapture, imageKey) {
 		page = await browser.newPage();
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
 		await sendImagetoAws(imageKey, imageBuffer);
-		result.imageUrl = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
+		result.imagePath = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
 	} catch (error) {
 		console.log(error);
 		result.error = error;
