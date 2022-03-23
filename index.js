@@ -1,5 +1,5 @@
 const chromium = require('chrome-aws-lambda');
-const { S3Client, PutObjectCommand } = require('aws-sdk');
+const S3 = require('aws-sdk/clients/s3');
 
 async function getBrowserInstance() {
 	return chromium.puppeteer.launch({
@@ -7,8 +7,8 @@ async function getBrowserInstance() {
 		executablePath: await chromium.executablePath,
 		headless: chromium.headless,
 		defaultViewport: {
-			width: process.env.VIEWPORT_WIDTH,
-			height: process.env.VIEWPORT_HEIGHT
+			width: +process.env.VIEWPORT_WIDTH,
+			height: +process.env.VIEWPORT_HEIGHT
 		},
 		ignoreHTTPSErrors: true
 	});
@@ -23,28 +23,24 @@ async function getImageBufferFromPage(page, pageToCapture) {
 		clip: {
 			x: boundingBox?.x ?? 0,
 			y: boundingBox?.y ?? 0,
-			width: boundingBox?.width || process.env.VIEWPORT_WIDTH,
-			height: process.env.SCREENSHOT_HEIGHT || process.env.VIEWPORT_HEIGHT
+			width: boundingBox?.width || +process.env.VIEWPORT_WIDTH,
+			height: +process.env.SCREENSHOT_HEIGHT || +process.env.VIEWPORT_HEIGHT
 		}
 	};
-	console.log(`Screenshot params: ${JSON.stringify(params)}`);
 	return (results || page).screenshot(params);
 }
 
 async function sendImagetoAws(imageKey, imageBuffer) {
 	if (!imageKey || !imageBuffer) return;
 
-	const client = new S3Client();
+	const client = new S3({ region: process.env.AWS_S3_REGION });
 	const params = {
 		Body: imageBuffer,
 		Key: imageKey,
 		Bucket: process.env.AWS_S3_BUCKET,
 		ACL: 'public-read'
 	};
-	console.log(`AWS command params: ${JSON.stringify(params)}`);
-	const commmand = new PutObjectCommand(params);
-	await client.send(commmand);
-
+	await client.putObject(params).promise();
 	return;
 }
 
@@ -53,20 +49,13 @@ async function takeScreenshot(pageToCapture, imageKey) {
 	let browser = null;
 	let page = null;
 	try {
-		console.log('Getting browser instance...');
 		browser = await getBrowserInstance();
-		console.log(
-			`Browser has newPage function: ${Object.prototype.hasOwnProperty.call(browser, 'newPage')}`
-		);
-		console.log(`Type of browser: ${typeof browser}`);
-		console.log('Opening browser page...');
 		page = await browser.newPage();
-		console.log('Taking screenshot...');
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
-		console.log('Putting screenshot in S3...');
 		await sendImagetoAws(imageKey, imageBuffer);
 		result.imageUrl = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
 	} catch (error) {
+		console.log(error);
 		result.error = error;
 	} finally {
 		if (page !== null) await page.close();
@@ -98,7 +87,7 @@ exports.handler = async function (event) {
 
 	return {
 		statusCode,
-		body,
-		headers
+		headers,
+		body: JSON.stringify(body)
 	};
 };

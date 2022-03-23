@@ -7,12 +7,13 @@
 		"lint": "eslint ./*.js"
 	},
 	"dependencies": {
-		"puppeteer-core": "^10.4.0",
-		"chrome-aws-lambda": "^10.1.0"
+		"chrome-aws-lambda": "^9.1.0",
+		"puppeteer-core": "^13.5.1"
 	},
 	"devDependencies": {
 		"eslint": "^8.1.0",
 		"eslint-config-prettier": "^8.3.0",
-		"prettier": "^2.4.1"
+		"prettier": "^2.4.1",
+		"puppeteer": "^13.5.1"
 	}
 }
