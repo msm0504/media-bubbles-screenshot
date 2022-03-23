@@ -15,7 +15,7 @@ async function getBrowserInstance() {
 }
 
 async function getImageBufferFromPage(page, pageToCapture) {
-	await page.goto(pageToCapture);
+	await page.goto(pageToCapture, { waitUntil: 'networkidle0' });
 	await page.waitForSelector(process.env.SELECTOR);
 	const results = await page.$(process.env.SELECTOR);
 	const boundingBox = await results?.boundingBox();
