@@ -1,6 +1,6 @@
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 async function getBrowserInstance() {
 	return puppeteer.launch({
@@ -41,7 +41,8 @@ async function loadImageToS3(imageKey, imageBuffer) {
 		Bucket: process.env.AWS_S3_BUCKET,
 		ACL: 'public-read',
 	};
-	return s3Client.send(params);
+	const commmand = new PutObjectCommand(params);
+	return s3Client.send(commmand);
 }
 
 async function takeScreenshot(pageToCapture, imageKey) {
