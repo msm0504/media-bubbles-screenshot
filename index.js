@@ -1,6 +1,6 @@
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
-const S3 = require('aws-sdk/clients/s3');
+const { S3Client } = require('@aws-sdk/client-s3');
 
 async function getBrowserInstance() {
 	return puppeteer.launch({
@@ -31,18 +31,17 @@ async function getImageBufferFromPage(page, pageToCapture) {
 	return (results || page).screenshot(params);
 }
 
-async function sendImagetoAws(imageKey, imageBuffer) {
+async function loadImageToS3(imageKey, imageBuffer) {
 	if (!imageKey || !imageBuffer) return;
 
-	const client = new S3({ region: process.env.AWS_S3_REGION });
+	const s3Client = new S3Client({ region: process.env.AWS_S3_REGION });
 	const params = {
 		Body: imageBuffer,
 		Key: imageKey,
 		Bucket: process.env.AWS_S3_BUCKET,
 		ACL: 'public-read',
 	};
-	await client.putObject(params).promise();
-	return;
+	return s3Client.send(params);
 }
 
 async function takeScreenshot(pageToCapture, imageKey) {
@@ -53,7 +52,7 @@ async function takeScreenshot(pageToCapture, imageKey) {
 		browser = await getBrowserInstance();
 		page = await browser.newPage();
 		const imageBuffer = await getImageBufferFromPage(page, pageToCapture);
-		await sendImagetoAws(imageKey, imageBuffer);
+		await loadImageToS3(imageKey, imageBuffer);
 		result.imagePath = `http://s3-${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET}/${imageKey}`;
 	} catch (error) {
 		console.log(error);
