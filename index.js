@@ -1,16 +1,17 @@
-const chromium = require('chrome-aws-lambda');
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-core');
 const S3 = require('aws-sdk/clients/s3');
 
 async function getBrowserInstance() {
-	return chromium.puppeteer.launch({
+	return puppeteer.launch({
 		args: chromium.args,
-		executablePath: await chromium.executablePath,
+		executablePath: await chromium.executablePath(),
 		headless: chromium.headless,
 		defaultViewport: {
 			width: +process.env.VIEWPORT_WIDTH,
-			height: +process.env.VIEWPORT_HEIGHT
+			height: +process.env.VIEWPORT_HEIGHT,
 		},
-		ignoreHTTPSErrors: true
+		ignoreHTTPSErrors: true,
 	});
 }
 
@@ -24,8 +25,8 @@ async function getImageBufferFromPage(page, pageToCapture) {
 			x: boundingBox?.x ?? 0,
 			y: boundingBox?.y ?? 0,
 			width: boundingBox?.width || +process.env.VIEWPORT_WIDTH,
-			height: +process.env.SCREENSHOT_HEIGHT || +process.env.VIEWPORT_HEIGHT
-		}
+			height: +process.env.SCREENSHOT_HEIGHT || +process.env.VIEWPORT_HEIGHT,
+		},
 	};
 	return (results || page).screenshot(params);
 }
@@ -38,7 +39,7 @@ async function sendImagetoAws(imageKey, imageBuffer) {
 		Body: imageBuffer,
 		Key: imageKey,
 		Bucket: process.env.AWS_S3_BUCKET,
-		ACL: 'public-read'
+		ACL: 'public-read',
 	};
 	await client.putObject(params).promise();
 	return;
@@ -68,10 +69,10 @@ exports.handler = async function (event) {
 	let body;
 	let statusCode = 200;
 	const headers = {
-		'Content-Type': 'application/json'
+		'Content-Type': 'application/json',
 	};
 
-	const { pageToCapture, imageKey } = JSON.parse(event.body);
+	const { pageToCapture, imageKey } = event;
 	if (!pageToCapture || !imageKey) {
 		statusCode = 400;
 		body = 'Request Body must contain pageToCapture and imageKey properties';
@@ -88,6 +89,6 @@ exports.handler = async function (event) {
 	return {
 		statusCode,
 		headers,
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
 	};
 };
