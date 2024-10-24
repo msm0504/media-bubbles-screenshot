@@ -19,16 +19,22 @@ async function getImageBufferFromPage(page, pageToCapture) {
 	await page.goto(pageToCapture, { waitUntil: 'networkidle0' });
 	await page.waitForSelector(process.env.SELECTOR);
 	const results = await page.$(process.env.SELECTOR);
-	const boundingBox = await results?.boundingBox();
+	if (!results) {
+		throw new Error('Element not found on page');
+	}
+	const boundingBox = await results.boundingBox();
 	const params = {
 		clip: {
-			x: boundingBox?.x ?? 0,
-			y: boundingBox?.y ?? 0,
-			width: boundingBox?.width || +process.env.VIEWPORT_WIDTH,
-			height: +process.env.SCREENSHOT_HEIGHT || +process.env.VIEWPORT_HEIGHT,
+			x: boundingBox.x,
+			y: boundingBox.y,
+			width: Math.min(boundingBox.width, +process.env.VIEWPORT_WIDTH),
+			height: Math.min(
+				boundingBox.height,
+				+process.env.SCREENSHOT_HEIGHT || +process.env.VIEWPORT_HEIGHT
+			),
 		},
 	};
-	return (results || page).screenshot(params);
+	return page.screenshot(params);
 }
 
 async function loadImageToS3(imageKey, imageBuffer) {
