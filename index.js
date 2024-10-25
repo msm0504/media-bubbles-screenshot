@@ -45,7 +45,6 @@ async function loadImageToS3(imageKey, imageBuffer) {
 		Body: imageBuffer,
 		Key: imageKey,
 		Bucket: process.env.AWS_S3_BUCKET,
-		ACL: 'public-read',
 	};
 	const commmand = new PutObjectCommand(params);
 	return s3Client.send(commmand);
