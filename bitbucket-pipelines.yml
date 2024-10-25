@@ -21,7 +21,7 @@ pipelines:
             variables:
               AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
               AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: 'us-east-2'
+              AWS_DEFAULT_REGION: 'us-east-1'
               FUNCTION_NAME: 'takeScreenshot'
               COMMAND: 'update'
               ZIP_FILE: 'code.zip'
