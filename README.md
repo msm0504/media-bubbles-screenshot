@@ -1,4 +1,4 @@
-This Lambda function will take a screenshot of a given webpage and save the image to an AWS S3 bucket.
+This Lambda function will take a screenshot of a saved Media Bubbles search result and save the image to an AWS S3 bucket.
 
 ## Lambda Environment Variables
 
